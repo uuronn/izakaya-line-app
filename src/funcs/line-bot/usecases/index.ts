@@ -5,6 +5,7 @@ import { errorLogger } from '~/utils/util'
 import { msgError } from '~lineBot/notice-messages/other'
 
 import { followUsecase } from './follow'
+import { joinUsecase } from './join'
 import { messagesUsecase } from './messages'
 
 export const usecases = async (event: WebhookEvent): Promise<void> => {
@@ -14,6 +15,8 @@ export const usecases = async (event: WebhookEvent): Promise<void> => {
         return await followUsecase(event)
       case 'message':
         return await messagesUsecase(event)
+      case 'join':
+        return await joinUsecase(event)
       default:
     }
   } catch (err) {
