@@ -6,7 +6,7 @@ export const orderMessage = (
   list: { name: string; length: number }[]
 ): Message => {
   const orderBox = (list: { name: string; length: number }[]): FlexComponent[] => {
-    return list.map((item) => {
+    return list.sort().map((item) => {
       return {
         type: 'box',
         layout: 'horizontal',
@@ -23,6 +23,16 @@ export const orderMessage = (
             gravity: 'center'
           },
           {
+            type: 'button',
+            action: {
+              type: 'message',
+              label: '＋',
+              text: `${item.name}を追加`
+            },
+            flex: 18,
+            style: 'primary'
+          },
+          {
             type: 'text',
             text: `× ${item.length}`,
             weight: 'bold',
@@ -34,18 +44,8 @@ export const orderMessage = (
             type: 'button',
             action: {
               type: 'message',
-              label: '＋',
-              text: '追加'
-            },
-            flex: 18,
-            style: 'primary'
-          },
-          {
-            type: 'button',
-            action: {
-              type: 'message',
               label: 'ー',
-              text: '削除'
+              text: `${item.name}を削除`
             },
             flex: 18,
             style: 'secondary'
