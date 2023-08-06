@@ -11,7 +11,7 @@ export const orderMessage = (
         type: 'box',
         layout: 'horizontal',
         borderWidth: '1px',
-        backgroundColor: '#efefef',
+        backgroundColor: '#FFE8AF',
         borderColor: '#100808FF',
         contents: [
           {

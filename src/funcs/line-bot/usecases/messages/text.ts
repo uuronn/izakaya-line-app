@@ -11,7 +11,7 @@ import { errorLogger } from '~/utils/util'
 
 export const quickReply: TextMessage = {
   type: 'text',
-  text: '',
+  text: 'その他メニュー',
   quickReply: {
     items: [
       {
@@ -48,26 +48,50 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
       if (!doc.exists || !res) return
 
       if (text === '受付開始' && res.isOpen === false) {
-        await cityRef.set({ isOpen: true })
+        await cityRef.set({ orderList: [], isOpen: true })
 
-        await lineClient.replyMessage(event.replyToken, {
-          type: 'text',
-          text: '注文したいものを送信してください'
-        })
+        await lineClient.replyMessage(event.replyToken, [
+          {
+            type: 'text',
+            text: '注文したいものを送信してください'
+          },
+          quickReply
+        ])
 
         return
       }
 
       if (text === '注文リセット' && res.isOpen === true) {
-        await cityRef.set({ isOpen: false })
+        await cityRef.set({ orderList: [], isOpen: false })
 
-        await cityRef.set({ orderList: [] })
+        await lineClient.replyMessage(event.replyToken, [
+          {
+            type: 'text',
+            text: '注文がリセットされて、受付が終了しました'
+          },
+          quickReply
+        ])
 
-        await lineClient.replyMessage(event.replyToken, {
-          type: 'text',
-          text: '注文がリセットされて、受付が終了しました'
-        })
+        return
+      }
 
+      if (!res.isOpen) {
+        await lineClient.replyMessage(event.replyToken, [
+          {
+            type: 'text',
+            text: '「受付開始」を送信してください'
+          },
+          quickReply
+        ])
+        return
+      } else if (text === '受付開始') {
+        await lineClient.replyMessage(event.replyToken, [
+          {
+            type: 'text',
+            text: '注文受付中です'
+          },
+          quickReply
+        ])
         return
       }
 
@@ -84,7 +108,7 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
           targetElement.length += 1
         }
 
-        await cityRef.set({ orderList: list })
+        await cityRef.set({ orderList: list, isOpen: true })
 
         await lineClient.replyMessage(event.replyToken, [
           orderMessage(text, groupId, list),
@@ -102,7 +126,7 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
 
         const newList = list.filter((item) => item.length > 0)
 
-        await cityRef.set({ orderList: newList })
+        await cityRef.set({ orderList: newList, isOpen: true })
 
         await lineClient.replyMessage(event.replyToken, [
           orderMessage(text, groupId, newList),
@@ -116,7 +140,7 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
       if (createElement) {
         createElement.length += 1
 
-        await cityRef.set({ orderList: list })
+        await cityRef.set({ orderList: list, isOpen: true })
 
         await lineClient.replyMessage(event.replyToken, [
           orderMessage(text, groupId, list),
@@ -127,7 +151,7 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
 
       list.push({ name: text, length: 1 })
 
-      await cityRef.set({ orderList: list })
+      await cityRef.set({ orderList: list, isOpen: true })
 
       await lineClient.replyMessage(event.replyToken, [
         orderMessage(text, groupId, list),
