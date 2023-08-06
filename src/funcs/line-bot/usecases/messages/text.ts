@@ -1,4 +1,4 @@
-import { MessageEvent, TextEventMessage } from '@line/bot-sdk'
+import { MessageEvent, TextEventMessage, TextMessage } from '@line/bot-sdk'
 
 import { lineClient } from '~/clients/line.client'
 import { db } from '~/libs/firebase/app'
@@ -8,6 +8,31 @@ import { errorLogger } from '~/utils/util'
 // *********
 // main関数
 // *********
+
+export const quickReply: TextMessage = {
+  type: 'text',
+  text: '',
+  quickReply: {
+    items: [
+      {
+        type: 'action',
+        action: {
+          type: 'message',
+          label: '受付開始',
+          text: `受付開始`
+        }
+      },
+      {
+        type: 'action',
+        action: {
+          type: 'message',
+          label: '注文リセット',
+          text: '注文リセット'
+        }
+      }
+    ]
+  }
+}
 
 export const messageTextUsecase = async (event: MessageEvent): Promise<void> => {
   try {
@@ -21,6 +46,30 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
       const res = doc.data()
 
       if (!doc.exists || !res) return
+
+      if (text === '受付開始' && res.isOpen === false) {
+        await cityRef.set({ isOpen: true })
+
+        await lineClient.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '注文したいものを送信してください'
+        })
+
+        return
+      }
+
+      if (text === '注文リセット' && res.isOpen === true) {
+        await cityRef.set({ isOpen: false })
+
+        await cityRef.set({ orderList: [] })
+
+        await lineClient.replyMessage(event.replyToken, {
+          type: 'text',
+          text: '注文がリセットされて、受付が終了しました'
+        })
+
+        return
+      }
 
       const list = res.orderList as { name: string; length: number }[]
 
@@ -37,7 +86,10 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
 
         await cityRef.set({ orderList: list })
 
-        await lineClient.replyMessage(event.replyToken, orderMessage(text, groupId, list))
+        await lineClient.replyMessage(event.replyToken, [
+          orderMessage(text, groupId, list),
+          quickReply
+        ])
         return
       }
 
@@ -52,7 +104,10 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
 
         await cityRef.set({ orderList: newList })
 
-        await lineClient.replyMessage(event.replyToken, orderMessage(text, groupId, newList))
+        await lineClient.replyMessage(event.replyToken, [
+          orderMessage(text, groupId, newList),
+          quickReply
+        ])
         return
       }
 
@@ -63,7 +118,10 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
 
         await cityRef.set({ orderList: list })
 
-        await lineClient.replyMessage(event.replyToken, orderMessage(text, groupId, list))
+        await lineClient.replyMessage(event.replyToken, [
+          orderMessage(text, groupId, list),
+          quickReply
+        ])
         return
       }
 
@@ -71,7 +129,10 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
 
       await cityRef.set({ orderList: list })
 
-      await lineClient.replyMessage(event.replyToken, orderMessage(text, groupId, list))
+      await lineClient.replyMessage(event.replyToken, [
+        orderMessage(text, groupId, list),
+        quickReply
+      ])
     }
   } catch (err) {
     errorLogger(err)

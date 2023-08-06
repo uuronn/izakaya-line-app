@@ -5,6 +5,7 @@ import { db } from '~/libs/firebase/app'
 import { errorLogger } from '~/utils/util'
 
 import { msgError, msgOther } from '../notice-messages/other'
+import { quickReply } from './messages/text'
 
 export const joinUsecase = async (event: JoinEvent): Promise<void> => {
   try {
@@ -15,9 +16,12 @@ export const joinUsecase = async (event: JoinEvent): Promise<void> => {
       case 'group': {
         const collectionRef = db.collection('groupList')
 
-        collectionRef.doc(event.source.groupId).set({ orderList: [] })
+        collectionRef.doc(event.source.groupId).set({ orderList: [], isOpen: false })
 
-        await lineClient.replyMessage(event.replyToken, { type: 'text', text: 'groupだよ' })
+        await lineClient.replyMessage(event.replyToken, [
+          { type: 'text', text: 'groupだよ' },
+          quickReply
+        ])
         return
       }
       case 'room':
