@@ -17,7 +17,30 @@ export const joinUsecase = async (event: JoinEvent): Promise<void> => {
 
         collectionRef.doc(event.source.groupId).set({ orderList: [], isOpen: false })
 
-        await lineClient.replyMessage(event.replyToken, { type: 'text', text: 'groupだよ' })
+        await lineClient.replyMessage(event.replyToken, {
+          type: 'text',
+          text: 'groupだよ',
+          quickReply: {
+            items: [
+              {
+                type: 'action',
+                action: {
+                  type: 'message',
+                  label: '受付開始',
+                  text: `受付開始`
+                }
+              },
+              {
+                type: 'action',
+                action: {
+                  type: 'message',
+                  label: '注文リセット',
+                  text: '注文リセット'
+                }
+              }
+            ]
+          }
+        })
         return
       }
       case 'room':
