@@ -1,10 +1,10 @@
-import { FlexComponent, Message } from '@line/bot-sdk'
+import { FlexComponent, FlexMessage } from '@line/bot-sdk'
 
 export const orderMessage = (
   text: string,
   groupId: string,
   list: { name: string; length: number }[]
-): Message => {
+): FlexMessage => {
   const orderBox = (list: { name: string; length: number }[]): FlexComponent[] => {
     return list.sort().map((item) => {
       return {
@@ -78,7 +78,42 @@ export const orderMessage = (
         layout: 'vertical',
         spacing: 'md',
         contents: orderBox(list)
+      },
+      footer: {
+        type: 'box',
+        layout: 'horizontal',
+        contents: [
+          {
+            type: 'button',
+            action: {
+              type: 'uri',
+              label: 'リストを確認する',
+              uri: `https://liff.line.me/2000382464-nMOZeW5E?group=${groupId}`
+            },
+            style: 'primary'
+          }
+        ]
       }
+    },
+    quickReply: {
+      items: [
+        {
+          type: 'action',
+          action: {
+            type: 'message',
+            label: '受付開始',
+            text: `受付開始`
+          }
+        },
+        {
+          type: 'action',
+          action: {
+            type: 'message',
+            label: '注文リセット',
+            text: '注文リセット'
+          }
+        }
+      ]
     }
   }
 }
