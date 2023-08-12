@@ -1,4 +1,4 @@
-import { MessageEvent, TextEventMessage, TextMessage } from '@line/bot-sdk'
+import { MessageEvent, QuickReply, TextEventMessage } from '@line/bot-sdk'
 
 import { lineClient } from '~/clients/line.client'
 import { db } from '~/libs/firebase/app'
@@ -9,29 +9,25 @@ import { errorLogger } from '~/utils/util'
 // main関数
 // *********
 
-export const quickReply: TextMessage = {
-  type: 'text',
-  text: 'その他メニュー',
-  quickReply: {
-    items: [
-      {
-        type: 'action',
-        action: {
-          type: 'message',
-          label: '受付開始',
-          text: `受付開始`
-        }
-      },
-      {
-        type: 'action',
-        action: {
-          type: 'message',
-          label: '注文リセット',
-          text: '注文リセット'
-        }
+export const quickReply: QuickReply = {
+  items: [
+    {
+      type: 'action',
+      action: {
+        type: 'message',
+        label: '受付開始',
+        text: `受付開始`
       }
-    ]
-  }
+    },
+    {
+      type: 'action',
+      action: {
+        type: 'message',
+        label: '注文リセット',
+        text: '注文リセット'
+      }
+    }
+  ]
 }
 
 export const messageTextUsecase = async (event: MessageEvent): Promise<void> => {
@@ -42,10 +38,12 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
       if (text.length >= 64) {
         await lineClient.replyMessage(event.replyToken, {
           type: 'text',
-          text: '文字数多くて受付できませんでした。'
+          text: '文字数多くて受付できませんでした。',
+          quickReply
         })
         return
       }
+
       const groupId = event.source.groupId
 
       const cityRef = db.collection('groupList').doc(groupId)
@@ -70,7 +68,8 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
 
         await lineClient.replyMessage(event.replyToken, {
           type: 'text',
-          text: '注文がリセットされて、受付が終了しました'
+          text: '注文がリセットされて、受付が終了しました',
+          quickReply
         })
 
         return
@@ -79,13 +78,15 @@ export const messageTextUsecase = async (event: MessageEvent): Promise<void> => 
       if (!res.isOpen) {
         await lineClient.replyMessage(event.replyToken, {
           type: 'text',
-          text: '「受付開始」を送信してください'
+          text: '「受付開始」を送信してください',
+          quickReply
         })
         return
       } else if (text === '受付開始') {
         await lineClient.replyMessage(event.replyToken, {
           type: 'text',
-          text: '注文受付中です'
+          text: '注文受付中です',
+          quickReply
         })
         return
       }

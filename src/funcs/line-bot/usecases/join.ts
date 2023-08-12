@@ -5,6 +5,7 @@ import { db } from '~/libs/firebase/app'
 import { errorLogger } from '~/utils/util'
 
 import { msgError, msgOther } from '../notice-messages/other'
+import { quickReply } from './messages/text'
 
 export const joinUsecase = async (event: JoinEvent): Promise<void> => {
   try {
@@ -20,26 +21,7 @@ export const joinUsecase = async (event: JoinEvent): Promise<void> => {
         await lineClient.replyMessage(event.replyToken, {
           type: 'text',
           text: 'groupだよ',
-          quickReply: {
-            items: [
-              {
-                type: 'action',
-                action: {
-                  type: 'message',
-                  label: '受付開始',
-                  text: `受付開始`
-                }
-              },
-              {
-                type: 'action',
-                action: {
-                  type: 'message',
-                  label: '注文リセット',
-                  text: '注文リセット'
-                }
-              }
-            ]
-          }
+          quickReply
         })
         return
       }

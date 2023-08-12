@@ -1,5 +1,7 @@
 import { FlexComponent, FlexMessage } from '@line/bot-sdk'
 
+import { quickReply } from '~/funcs/line-bot/usecases/messages/text'
+
 export const orderMessage = (
   text: string,
   groupId: string,
@@ -18,7 +20,7 @@ export const orderMessage = (
             type: 'text',
             text: item.name,
             weight: 'bold',
-            flex: 50,
+            flex: 42,
             align: 'center',
             gravity: 'center'
           },
@@ -29,12 +31,12 @@ export const orderMessage = (
               label: '＋',
               text: `${item.name}を追加`
             },
-            flex: 18,
+            flex: 22,
             style: 'primary'
           },
           {
             type: 'text',
-            text: `× ${item.length}`,
+            text: `${item.length}`,
             weight: 'bold',
             flex: 14,
             align: 'center',
@@ -47,7 +49,7 @@ export const orderMessage = (
               label: 'ー',
               text: `${item.name}を削除`
             },
-            flex: 18,
+            flex: 22,
             style: 'secondary'
           }
         ]
@@ -95,25 +97,6 @@ export const orderMessage = (
         ]
       }
     },
-    quickReply: {
-      items: [
-        {
-          type: 'action',
-          action: {
-            type: 'message',
-            label: '受付開始',
-            text: `受付開始`
-          }
-        },
-        {
-          type: 'action',
-          action: {
-            type: 'message',
-            label: '注文リセット',
-            text: '注文リセット'
-          }
-        }
-      ]
-    }
+    quickReply
   }
 }
