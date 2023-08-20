@@ -32,6 +32,14 @@ export const quickReply: QuickReply = {
 
 export const messageTextUsecase = async (event: MessageEvent): Promise<void> => {
   try {
+    if (event.source.type === 'user') {
+      await lineClient.replyMessage(event.replyToken, {
+        type: 'text',
+        text: '只今、グループラインでの対応しか行っておりません'
+      })
+
+      return
+    }
     if (event.source.type === 'group') {
       const { text } = event.message as TextEventMessage
 
